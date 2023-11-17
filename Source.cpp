@@ -1,176 +1,140 @@
-#include <iostream>
+#include<iostream>
 using namespace std;
 
-template<typename T>
-class singlyLinkedList;
+template<class T>
+class DoublyLinkedList;
 
-template<typename T>
-class Node
-{
-	T data;
-	Node* next;
-	friend class singlyLinkedList<T>;
+template <class T>
+class Node {
+    T data = NULL;
+    Node<T>* next;
+    Node<T>* prev;
+    friend class DoublyLinkedList<T>;
 public:
-	Node<T>() {
-		this->next = NULL;
-	}
+    Node<T>() {
+        this->next = NULL, this->prev = NULL;
+    }
 };
 
-template<typename T>
-class singlyLinkedList {
-	Node<T>* head;
+template<class T>
+class DoublyLinkedList {
+    Node<T>* head;
 public:
-	singlyLinkedList() {
-		head = nullptr;
-	}
+    DoublyLinkedList() {
+        this->head = nullptr;
+    }
+    ~DoublyLinkedList() {
+        Node<T>* curr = head;
 
-	//Insert at start 
-	void insertatstart(T val) {
-		Node<T>* new_node = new Node<T>;
-		new_node->data = val;
-		new_node->next = head;
-		head = new_node;
-	}
+        while (head != NULL) {
+            head = curr->next;
+            delete curr;
+            curr = head;
+        }
+    }
+    bool insertAtStart(T const element) {
+        Node<T>* temp = new Node<T>;
+        temp->data = element;
+        temp->prev = NULL;
+        temp->next = head;
+        head = temp;
+        return 1;
+    }
+    bool insertAtEnd(T val) {
+        Node<T>* temp = new Node<T>;
+        temp->data = val;
+        temp->next = NULL;
+        temp->prev = NULL;
+        Node<T>* curr = head;
 
-	//Insert at end 
-	void insertatend(T val) {
-		Node<T>* new_node = new Node<T>;
-		new_node->data = val;
-		new_node->next = NULL;
-		Node<T>* prev = 0, * curr = head;
-		while (curr != NULL) {
-			prev = curr; curr = curr->next;
-		}
-		// if the element is first
-		if (prev == 0) {
-			head = new_node;
-		}
-		else {
-			prev->next = new_node;
-		}
-	}
+        while (curr->next != NULL) {
 
-	//Print 
-	void display() {
-		Node<T>* curr = head;
-		do {
-			cout << curr->data << "->";
-			curr = curr->next;
-		} while (curr != NULL);
-		cout << endl;
-	}
-	//Delete at Start 
-	void deleteatstart() {
-		if (head == NULL)
-			;
-		else {
-			Node<T>* curr = head;
-			head = curr->next;
-			delete curr;
-			curr = 0;
-		}
-	}
-	//Delete at End 
-	void deleteatend() {
-		if (head == 0) {
-			cout << "List is empty\n";
-		}
-		else {
-			Node<T>* curr = head, * last = 0, * secondLast = 0;
-			while (curr != NULL) {
-				secondLast = last;
-				last = curr;
-				curr = curr->next;
-			}
-			if (secondLast == 0) {
-				head = NULL;
-				delete	last;
-				last = 0;
-			}
-			else {
-				secondLast->next = NULL;
-				delete last;
-				last = 0;
-			}
-		}
-	}
+            curr = curr->next;
 
-	bool sortedInsert(T val)
-	{
-		Node<T>* temp = new Node<T>;
-		temp->data = val;
-		Node* curr = head, * prev = 0;
-		while (curr != NULL && curr->data < val)
-		{
-			prev = curr;
-			curr = curr->next;
-		}
-		if (prev == 0)
-		{
-			head = temp;
-		}
-		else
-		{
-			prev->next = temp;
-		}
-		temp->next = curr;
-		cout << "Element is inserted in Sorted Linked List...!\n";
-		return 1;
-	}
+        }
+        if (head == NULL) {
+            head = temp;
+            return 1;
+        }
+        else {
+            curr->next = temp;
+            temp->prev = curr;
+            return 1;
+        }
+    }
+    bool deleteFromStart() {
+        if (head == NULL)
+            return 0;
+        else {
+            Node<T>* curr = head;
+            head = curr->next;
+            delete curr;
+            curr = 0;
+            return 1;
+        }
+    }
+    bool deleteFromEnd() {
+        if (head == NULL) {
+            cout << "list is empty" << endl;
+            return 0;
+        }
+        else {
 
-	//Distructor
-	~singlyLinkedList() {
-		while (head != NULL) {
-			Node<T>* curr = head;
-			head = curr->next;
-			delete curr;
-			curr = head;
-		}
-	}
+            Node<T>* curr = head;
+            while (curr->next != NULL) {
+                curr = curr->next;
 
-	void printNth(int N) {
-		int len = 0;
-		Node<T>* temp = head;
+            }
+            curr->prev->next = NULL;
+            delete curr;
+            curr = NULL;
+            cout << "last block deleted:" << endl;
+            return 1;
+        }
+    }
+    void print() const {
+        Node<T>* curr = head;
+        while (curr != NULL) {
+            cout << curr->data << " ";
+            curr = curr->next;
+        }
+        cout << endl;
+    }
 
-		// Count the number of nodes in Linked List
-		while (temp->next != NULL) {
-			temp = temp->next;
-			len++;
-		}
+    bool isCircular() {
+        Node<T>* curr = NULL;
+        curr = head;
+        while (curr->next != NULL) {
+            curr = curr->next;
+        }
+        if (curr->next == NULL) {
+            cout << "not circular" << endl;
+            return 0;
+        }
+        cout << "circular" << endl;
 
-		// Check if value of N is not
-		// more than length of the linked list
-		if (len < N)
-			return;
-		else {
-			temp = head;
+        return 1;
 
-			// Get the (len-N+1)th node from the beginning
-			for (int i = 1; i < len-N+1; i++) {
-				temp = temp->next;
-			}
-			cout << temp->data << endl;;
-			return;
-
-		}
-	}
-
+    }
+    void todocircular() {
+        Node<T>* curr = NULL;
+        curr = head;
+        while (curr->next != NULL) {
+            curr = curr->next;
+        }
+        curr->next = head;
+        head->prev = curr;
+    }
 };
 
-int main()
-{
-	singlyLinkedList <int>l1;
-	l1.insertatstart(2);
-	l1.insertatstart(6);
-	l1.insertatstart(7);
-	//l1.insertatend(3);
-	//l1.insertatend(8);
-	//l1.insertatend(1);
-	/*l1.deleteatstart();
-	l1.deleteatend();*/
-	l1.printNth(1);
-	l1.display();
-	cout << endl;
+int main() {
+    DoublyLinkedList <int>l1;
+    l1.insertAtEnd(1);
+    l1.insertAtEnd(2);
+    l1.print();
+    l1.todocircular();
+    l1.isCircular();
 
-	return 0;
+
+    return 0;
 }
